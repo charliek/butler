@@ -53,7 +53,7 @@ func runCommand(cmd *exec.Cmd, commandOut chan string) error {
 	// TODO read from stderr as well
 	//errPipe, err := cmd.StderrPipe()
 	if err != nil {
-		log.Error("Error reading command output %v", err)
+		log.Warn("Error reading command output %s", err)
 		return err
 	}
 	cmd.Start()
