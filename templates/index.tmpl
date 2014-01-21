@@ -1,1 +1,13 @@
-<h1>test</h1>
+{{ range . }}
+<div>
+<h1>{{ .Display }}</h1> 
+
+{{if .IsLocal}}
+	<a href="/api/task/vagrant/{{.Name}}">Run Vagrant</a>
+{{ else }}
+	<a href="/api/task/local/{{.Name}}">Run Local</a><br/>
+{{ end }}
+
+<!-- <p class="lead">Use this document as a way to quickly start any new project.<br> All you get is this text and a mostly barebones HTML document.</p> -->
+</div>
+{{end}}

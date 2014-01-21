@@ -1,0 +1,22 @@
+{
+
+	"root_url": "https://blog-vagrant.charlieknudsen.com",
+
+	"redis": {
+		"host": "localhost",
+		"port": 6379,
+		"database": 3
+	},
+
+	"services": [{
+		"name": "blog-service",
+		"display": "Blog Service",
+		"service_type": "upstart",
+		"port": 8080,
+		"health_check": {
+			"type": "http",
+			"url_suffix": "/ping"
+		}
+	}]
+
+}
