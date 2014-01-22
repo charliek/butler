@@ -1,7 +1,9 @@
 package service
 
 import (
+	"fmt"
 	"github.com/charliek/butler/iptables"
+	"github.com/charliek/butler/task"
 	log "github.com/ngmoco/timber"
 )
 
@@ -10,6 +12,20 @@ type ButlerService struct {
 	Display     string
 	ServiceType string
 	Port        int
+}
+
+func (s *ButlerService) Stop() error {
+	cmd := fmt.Sprintf("sudo service %s stop", s.Name)
+	stdout, err := task.ExecuteStringTask(cmd)
+	log.Info("Service output: %s", stdout)
+	return err
+}
+
+func (s *ButlerService) Start() error {
+	cmd := fmt.Sprintf("sudo service %s start", s.Name)
+	stdout, err := task.ExecuteStringTask(cmd)
+	log.Info("Service output: %s", stdout)
+	return err
 }
 
 func (s *ButlerService) RunLocal() error {

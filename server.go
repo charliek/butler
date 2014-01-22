@@ -52,6 +52,28 @@ func main() {
 		r.JSON(200, registry.List())
 	})
 
+	m.Get("/api/task/stop/:name", func(params martini.Params, res http.ResponseWriter, req *http.Request) {
+		service, ok := registry.GetByName(params["name"])
+		if ok {
+			log.Info("Stopping service %s", service.Name)
+			service.Stop()
+			http.Redirect(res, req, "/", http.StatusFound)
+		} else {
+			http.NotFound(res, req)
+		}
+	})
+
+	m.Get("/api/task/start/:name", func(params martini.Params, res http.ResponseWriter, req *http.Request) {
+		service, ok := registry.GetByName(params["name"])
+		if ok {
+			log.Info("Starting service %s", service.Name)
+			service.Start()
+			http.Redirect(res, req, "/", http.StatusFound)
+		} else {
+			http.NotFound(res, req)
+		}
+	})
+
 	m.Get("/api/task/local/:name", func(params martini.Params, res http.ResponseWriter, req *http.Request) {
 		service, ok := registry.GetByName(params["name"])
 		if ok {
