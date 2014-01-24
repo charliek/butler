@@ -45,7 +45,7 @@ func ExecuteRecordedTask(task *Task) string {
 
 func executeWithRedis(id string, task *Task) {
 	status := &TaskStatus{id, PENDING, task.Description}
-	recordStatus(status)
+	initializeStatus(status)
 	for _, cmd := range task.Cmds {
 		recordLine(status, fmt.Sprintf("Running command: %s", strings.Join(cmd.Cmd, " ")))
 		recordLine(status, "***************************************")
@@ -58,7 +58,7 @@ func executeWithRedis(id string, task *Task) {
 	if status.Status == PENDING {
 		status.Status = COMPLETE
 	}
-	recordStatus(status)
+	updateStatus(status)
 }
 
 func executeRecordedTask(status *TaskStatus, cmd *exec.Cmd) error {

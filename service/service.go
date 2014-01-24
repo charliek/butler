@@ -20,7 +20,7 @@ func (s *ButlerService) Stop() error {
 	// log.Info("Service output: %s", stdout)
 
 	// TODO temporary hack while integrating redis
-	t := task.NewTask(fmt.Sprintf("Stop service %s", s.Display))
+	t := task.NewTask(fmt.Sprintf("stop %s", s.Display))
 	t.AddStringCommand(cmd, true)
 	task.ExecuteRecordedTask(t)
 	return nil

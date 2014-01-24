@@ -13,6 +13,7 @@ const (
 	PENDING  = "PENDING"
 	ERROR    = "ERROR"
 	COMPLETE = "COMPLETE"
+	listKey  = "tasks"
 )
 
 type TaskStatus struct {
@@ -21,12 +22,20 @@ type TaskStatus struct {
 	Description string
 }
 
+func (t *TaskStatus) redisListKey() string {
+	return fmt.Sprintf("task:%s:lines", t.Id)
+}
+
 func (t *TaskStatus) redisStatusKey() string {
-	return fmt.Sprintf("task:%s:status", t.Id)
+	return statusKeyFromId(t.Id)
 }
 
 func (t *TaskStatus) redisLineKey() string {
 	return fmt.Sprintf("task:%s:lines", t.Id)
+}
+
+func statusKeyFromId(id string) string {
+	return fmt.Sprintf("task:%s:status", id)
 }
 
 func ExecuteStringTask(cmd string) (string, error) {

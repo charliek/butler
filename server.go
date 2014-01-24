@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/charliek/butler/service"
+	"github.com/charliek/butler/task"
 	"github.com/codegangsta/martini"
 	"github.com/codegangsta/martini-contrib/render"
 	log "github.com/ngmoco/timber"
@@ -46,6 +47,15 @@ func main() {
 
 	m.Get("/", func(r render.Render) {
 		r.HTML(200, "index", registry.List())
+	})
+
+	m.Get("/executions", func(r render.Render) {
+		tasks, err := task.ListTasks()
+		if err != nil {
+			log.Warn("Error retriving task list %v", err)
+			// TODO need and error page
+		}
+		r.HTML(200, "executions", tasks)
 	})
 
 	m.Get("/api/services", func(r render.Render) {
