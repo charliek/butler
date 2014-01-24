@@ -2,7 +2,6 @@ package task
 
 import (
 	"bufio"
-	"crypto/rand"
 	"fmt"
 	log "github.com/ngmoco/timber"
 	"io"
@@ -10,57 +9,63 @@ import (
 	"strings"
 )
 
-func generateId() string {
-	buf := make([]byte, 16)
-	io.ReadFull(rand.Reader, buf)
-	return fmt.Sprintf("%x", buf)
-}
+const (
+	PENDING  = "PENDING"
+	ERROR    = "ERROR"
+	COMPLETE = "COMPLETE"
+)
 
-type Command struct {
-	FailOnError bool
-	cmd         []string
-}
-
-type Task struct {
+type TaskStatus struct {
+	Id          string
+	Status      string
 	Description string
-	cmds        []Command
+}
+
+func (t *TaskStatus) redisStatusKey() string {
+	return fmt.Sprintf("task:%s:status", t.Id)
+}
+
+func (t *TaskStatus) redisLineKey() string {
+	return fmt.Sprintf("task:%s:lines", t.Id)
 }
 
 func ExecuteStringTask(cmd string) (string, error) {
-	c := strings.Split(cmd, " ")
-	return ExecuteTask(c...)
+	log.Info("Executing task: %s", cmd)
+	return executeTask(stringToCmd(cmd))
 }
 
-func ExecuteTask(arg ...string) (string, error) {
-	return executeTask(arg[0], arg[1:]...)
-}
-
-func executeTask(name string, arg ...string) (string, error) {
-	log.Debug("Executing : %s %s\n", name, strings.Join(arg, " "))
-	cmd := exec.Command(name, arg...)
+func executeTask(cmd *exec.Cmd) (string, error) {
 	s := make([]string, 0, 10)
 	commandOut := make(chan string)
-	go runCommand(cmd, commandOut)
+	status := &TaskStatus{generateId(), PENDING, ""}
+	go runCommand(cmd, commandOut, status)
 	for line := range commandOut {
 		s = append(s, line)
 	}
 	return strings.Join(s, ""), nil
 }
 
-func runCommand(cmd *exec.Cmd, commandOut chan string) error {
+func runCommand(cmd *exec.Cmd, commandOut chan string, status *TaskStatus) {
 	defer close(commandOut)
+	status.Status = PENDING
 	outPipe, err := cmd.StdoutPipe()
 	// TODO read from stderr as well
 	//errPipe, err := cmd.StderrPipe()
 	if err != nil {
 		log.Warn("Error reading command output %s", err)
-		return err
+		status.Status = ERROR
+		return
 	}
 	cmd.Start()
 	readPipeOutput(outPipe, commandOut)
 	// TODO write status code to output
 	// Error on wait could be *ExitError
-	return cmd.Wait()
+	err = cmd.Wait()
+	if err != nil {
+		status.Status = ERROR
+	} else {
+		status.Status = COMPLETE
+	}
 }
 
 func readPipeOutput(pipe io.ReadCloser, commandOut chan string) {

@@ -16,9 +16,14 @@ type ButlerService struct {
 
 func (s *ButlerService) Stop() error {
 	cmd := fmt.Sprintf("sudo service %s stop", s.Name)
-	stdout, err := task.ExecuteStringTask(cmd)
-	log.Info("Service output: %s", stdout)
-	return err
+	// stdout, err := task.ExecuteStringTask(cmd)
+	// log.Info("Service output: %s", stdout)
+
+	// TODO temporary hack while integrating redis
+	t := task.NewTask(fmt.Sprintf("Stop service %s", s.Display))
+	t.AddStringCommand(cmd, true)
+	task.ExecuteRecordedTask(t)
+	return nil
 }
 
 func (s *ButlerService) Start() error {
