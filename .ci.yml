@@ -1,0 +1,17 @@
+environment:
+  image: charliek/ci-go:1.3
+  vars:
+    GITHUB_ROOT: $GOPATH/src/github.com/charliek
+    PROJECT_ROOT: $GITHUB_ROOT/butler
+
+build:
+  before_install:
+    - mkdir -p $GITHUB_ROOT
+    - cp -r /var/project $PROJECT_ROOT
+    - cd $PROJECT_ROOT
+
+  run:
+    - go get -t ./...
+    - go build ./...
+    - go test -race -short ./...
+    - go vet -x ./...
